@@ -1,0 +1,59 @@
+import tensorflow as tf
+import numpy as np
+
+# Generate sample data (you would use your flood data)
+data = np.random.rand(100, 10)
+
+# Define the DBM architecture
+visible_units = 10
+hidden_units_1 = 20
+hidden_units_2 = 10
+
+# Create placeholders for input data
+x = tf.keras.Input(shape=(visible_units,))
+
+# Define the weights and biases for each layer
+weights_1 = tf.Variable(tf.random.normal([visible_units, hidden_units_1], stddev=0.1))
+biases_1 = tf.Variable(tf.zeros([hidden_units_1]))
+weights_2 = tf.Variable(tf.random.normal([hidden_units_1, hidden_units_2], stddev=0.1))
+biases_2 = tf.Variable(tf.zeros([hidden_units_2]))
+
+# Define the energy function
+def energy(x, W, b):
+    return -tf.reduce_sum(tf.matmul(x, W) * x + b * x, axis=1)
+
+# Calculate the energy for each layer
+energy_1 = energy(x, weights_1, biases_1)
+energy_2 = energy(x, weights_2, biases_2)
+
+# Define a threshold for anomaly detection
+threshold = tf.Variable(initial_value=0.0, dtype=tf.float32)
+
+# Calculate the reconstruction error
+reconstruction_error = tf.abs(energy_2 - energy_1)
+
+# Define a function to detect anomalies
+def detect_anomalies(data, sess):
+    error = sess.run(reconstruction_error, feed_dict={x: data})
+    anomalies = error > threshold
+    return anomalies
+
+# Initialize the variables
+init = tf.compat.v1.global_variables_initializer()
+
+# Start a session
+with tf.compat.v1.Session() as sess:
+    sess.run(init)
+    
+    # Training loop (you would train the DBM on your data)
+    for epoch in range(num_epochs):
+        # Implement training procedures
+
+    # Calculate threshold (e.g., based on historical data)
+    threshold_value = sess.run(tf.reduce_mean(reconstruction_error), feed_dict={x: data})
+
+    # Detect anomalies
+    anomalies = detect_anomalies(data, sess)
+
+    # Print or handle the anomalies
+    print("Anomalies:", anomalies)
